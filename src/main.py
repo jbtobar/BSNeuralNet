@@ -98,13 +98,14 @@ class gridcmds:
                                      q=(0.01, 0.04),
                                      v=(0.25, 0.61),
                                      m=(3, 9),
-                                     size=200)
+                                     size=360)
             N = len(self.bs["Stock"])
             M = int(float(0.8*N))
             self.trainset = self.bs[:M]
             self.testset = self.bs[M:]
             self.epoch_rate = 0.01
             self.error_level = 0.00001
+            self.dlr_error = 1
         else:
             self.bs = self.BSDataset(S=(float(IP["Stock"]["down"].get()), float(IP["Stock"]["up"].get())),
                                    K=(float(IP["Strike"]["down"].get()), float(IP["Strike"]["up"].get())),
@@ -119,6 +120,7 @@ class gridcmds:
             self.testset = self.bs[M:]
             self.epoch_rate = float(self.epr.get()) / 100
             self.error_level = float(self.err_lvl.get())
+            self.dlr_error = float(self.dlr.get())
         print("Dataset Refreshed")
 
 
@@ -188,9 +190,10 @@ class graphs:
         x = self.num_line(len(y))
         self.pltErr.cla()
         self.pltErr.plot(x, y, color='limegreen')
-        for xx, yy in zip(x, y):
-            if yy >= -self.error_level and yy <= self.error_level:
-                self.pltErr.scatter(xx, yy, color='red')
+        self.pltErr.plot(x, y, color='black', linewidth=0.2)
+        #for xx, yy in zip(x, y):
+        #    if yy >= -self.error_level and yy <= self.error_level:
+        #        self.pltErr.scatter(xx, yy, color='red')
         self.errCV.draw()
         time.sleep(0.0001) # Makes sure plotter renders with a split break
 
@@ -200,6 +203,7 @@ class graphs:
             plot.cla()
         for canvas in (self.cvW1, self.cvW2, self.cvW3, self.errCV):
             canvas.draw()
+        self.epoch_meter.configure(text=".....")
 
 # Contains your neural network functions
 class neural:
@@ -328,7 +332,8 @@ class neural:
 
 
                     # Plot weights
-                    if epoch % 4 == 0: clearPlots()
+                    #if epoch % 4 == 0: clearPlots()
+                    clearPlots()
                     self.plotWeights(W1, W2, W3)
 
                 print('Training Epoch: ', epoch + 1)
@@ -343,7 +348,7 @@ class neural:
 
     # This function tests your models strength
     def testModel(self):
-
+        errCount = 0
         for epoch, (S, K, r, q, v, t, op) in enumerate(self.testset.values):
             self.epoch_meter.configure(text='Testing: {} Epochs Left'.format(len(self.testset.values) - epoch - 1))
 
@@ -364,10 +369,12 @@ class neural:
 
             estimated_price = EST_OUTPUT[0][0] * (self.model.out_stats["max"] - self.model.out_stats["min"]) + self.model.out_stats["min"]
             self.model.dollar_error.append(abs(actual_price - estimated_price))
+            if abs(actual_price - estimated_price) < self.dlr_error:
+                errCount += 1
 
             self.plotDollar(self.model.dollar_error)
-
-        self.epoch_meter.configure(text=".....")
+        ratio = errCount / len(self.testset.values)
+        self.epoch_meter.configure(text="Model Score: {}".format('{0:.2f}%'.format(ratio*100)))
 # Your main class, the center of everything. The first step is to inherit
 # all of the subclasses
 class gridboard(tk.Tk,
@@ -425,8 +432,11 @@ class gridboard(tk.Tk,
         tk.Label(frame, text="  ").grid(row=1, column=6)
         tk.Button(frame, text="Update DataSet", command=lambda: self.update_dataset()).grid(row=1, column=7)
         tk.Label(frame, text="Epoch Rate: ").grid(row=2, column=1)
+        tk.Label(frame, text="Dollar Error: ").grid(row=3, column=1)
         self.epr = ttk.Entry(frame, width=5, justify="center")
+        self.dlr = ttk.Entry(frame, width=5, justify="center")
         self.epr.grid(row=2, column=2)
+        self.dlr.grid(row=3, column=2)
         tk.Label(frame, text="%").grid(row=2, column=3)
         tk.Label(frame, text=" Error: ").grid(row=2, column=4)
         self.err_lvl = ttk.Entry(frame, width=7, justify="center")
