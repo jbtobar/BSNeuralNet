@@ -8,7 +8,15 @@ using neural networks" by Shuaiqiang Liu, Cornelis W. Oosterlee, and Sander M.Bo
 https://arxiv.org/pdf/1901.08943.pdf
 
 Our methods are different, with my main objective to not have the best model, but rather visualize weights being adjusted as training is taking place.
- 
+
+## Running Example
+
+In order to run this GUI, execute
+```sh
+> python3 main.py
+```
+
+![Alt](https://github.com/MoSharieff/BSNeuralNet/blob/master/images/EG.gif)
 
 ## Overview
 
@@ -27,11 +35,4 @@ The user is able to select a default dataset, or input their own parameters. Onc
 
 ![Screenshot](https://github.com/MoSharieff/BSNeuralNet/blob/master/images/nnet.png)
 
-## Running Example
 
-In order to run this GUI, execute
-```sh
-> python3 main.py
-```
-
-![Alt](https://github.com/MoSharieff/BSNeuralNet/blob/master/images/demo.gif)
