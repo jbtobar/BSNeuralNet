@@ -24,6 +24,12 @@ import tkinter.ttk as ttk
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
+import matplotlib
+
+BG_COLOR = 'black'
+FG_COLOR = 'cyan'
+
+matplotlib.rc('axes', facecolor=BG_COLOR, edgecolor=BG_COLOR)
 
 
 # Contains all of your lambda functions and defined variables
@@ -130,33 +136,57 @@ class graphs:
     # Graph of your first weight matrix
     def weightOne(self, frame):
         fig = Figure(figsize=self.graph_fig, dpi=100)
+        fig.patch.set_facecolor(BG_COLOR)
         self.cvW1 = FigureCanvasTkAgg(fig, frame)
         self.pltW1 = fig.add_subplot(111, projection="3d")
-        tk.Label(frame, text="Weight Matrix (1)").grid(row=1, column=1)
+        for q in ('x', 'y', 'z'):
+            self.pltW1.tick_params(axis=q, colors=FG_COLOR)
+        for ap in (self.pltW1.xaxis, self.pltW1.yaxis, self.pltW1.zaxis):
+            ap.pane.set_facecolor(BG_COLOR)
+            ap.pane.set_edgecolor(BG_COLOR)
+        self.pltW1.grid(False)
+        tk.Label(frame, text="Weight Matrix (1)", bg=BG_COLOR, fg=FG_COLOR).grid(row=1, column=1)
+        fig.tight_layout()
         self.cvW1.get_tk_widget().grid(row=2, column=1)
 
     # Graph of your second weight matrix
     def weightTwo(self, frame):
         fig = Figure(figsize=self.graph_fig, dpi=100)
+        fig.patch.set_facecolor(BG_COLOR)
         self.cvW2 = FigureCanvasTkAgg(fig, frame)
         self.pltW2 = fig.add_subplot(111, projection="3d")
-        tk.Label(frame, text="Weight Matrix (2)").grid(row=1, column=2)
+        for q in ('x', 'y', 'z'):
+            self.pltW2.tick_params(axis=q, colors=FG_COLOR)
+        for ap in (self.pltW2.xaxis, self.pltW2.yaxis, self.pltW2.zaxis):
+            ap.pane.set_facecolor(BG_COLOR)
+            ap.pane.set_edgecolor(BG_COLOR)
+        self.pltW2.grid(False)
+        tk.Label(frame, text="Weight Matrix (2)", bg=BG_COLOR, fg=FG_COLOR).grid(row=1, column=2)
+        fig.tight_layout()
         self.cvW2.get_tk_widget().grid(row=2, column=2)
 
     # Graph of your third weight matrix
     def weightThree(self, frame):
         fig = Figure(figsize=self.graph_fig, dpi=100)
+        fig.patch.set_facecolor(BG_COLOR)
         self.cvW3 = FigureCanvasTkAgg(fig, frame)
         self.pltW3 = fig.add_subplot(111)
-        tk.Label(frame, text="Weight Matrix (3)").grid(row=1, column=3)
+        for q in ('x', 'y'):
+            self.pltW3.tick_params(axis=q, colors=FG_COLOR)
+        tk.Label(frame, text="Weight Matrix (3)", bg=BG_COLOR, fg=FG_COLOR).grid(row=1, column=3)
+        fig.tight_layout()
         self.cvW3.get_tk_widget().grid(row=2, column=3)
 
     # Graph of your dollar error
     def errorGraph(self, frame):
         fig = Figure(figsize=self.graph_fig, dpi=100)
+        fig.patch.set_facecolor(BG_COLOR)
         self.errCV = FigureCanvasTkAgg(fig, frame)
         self.pltErr = fig.add_subplot(111)
-        tk.Label(frame, text="Pricing Error ($)").grid(row=3, column=1)
+        for q in ('x', 'y'):
+            self.pltErr.tick_params(axis=q, colors=FG_COLOR)
+        tk.Label(frame, text="Pricing Error ($)", bg=BG_COLOR, fg=FG_COLOR).grid(row=3, column=1)
+        fig.tight_layout()
         self.errCV.get_tk_widget().grid(row=4, column=1)
 
     # Plots your weights
@@ -165,24 +195,28 @@ class graphs:
         s1, d1 = w2.shape
         s2 = len(w3)
 
+        self.pltW1.grid(False)
+        self.pltW2.grid(False)
+
         # Plot Weight Matrix One
         x, y = np.meshgrid(self.num_line(d0), self.num_line(s0))
         z = np.array(w1)
-        self.pltW1.plot_surface(x, y, z, cmap='jet', edgecolor='black', linewidth=0.4, alpha=0.6)
+        self.pltW1.plot_surface(x, y, z, cmap='hsv', edgecolor='black', linewidth=0.4, alpha=0.6)
         self.cvW1.draw()
 
         # Plot Weight Matrix Two
         x, y = np.meshgrid(self.num_line(d1), self.num_line(s1))
         z = np.array(w2)
-        self.pltW2.plot_surface(x, y, z, cmap='jet', edgecolor='black', linewidth=0.4, alpha=0.6)
+        self.pltW2.plot_surface(x, y, z, cmap='hsv', edgecolor='black', linewidth=0.4, alpha=0.6)
         self.cvW2.draw()
 
         # Plot Weight Matrix Three
         y = [float(f[0]) for f in w3]
         x = self.num_line(len(y))
-        self.pltW3.bar(x, y, color='purple', alpha=0.6, edgecolor='black', linewidth=0.4)
+        self.pltW3.bar(x, y, color=FG_COLOR, alpha=0.6, edgecolor='black', linewidth=0.4)
         self.cvW3.draw()
 
+        
         time.sleep(0.0001) # Makes sure plotter renders with a split break
 
     # Plots your dollar error
@@ -389,9 +423,10 @@ class gridboard(tk.Tk,
         tk.Tk.__init__(self)
         tk.Tk.wm_title(self, "Black Scholes Neural Net")
         self.geometry(self.resolution(1300, 820))
+        self.configure(bg=BG_COLOR)
 
         # Initialize graph frame
-        graphFrame = tk.Frame(self)
+        graphFrame = tk.Frame(self, bg=BG_COLOR)
         graphFrame.pack(side=tk.TOP)
         self.weightOne(graphFrame)
         self.weightTwo(graphFrame)
@@ -399,58 +434,58 @@ class gridboard(tk.Tk,
         self.errorGraph(graphFrame)
 
         # Initialize control frame
-        controlFrame = tk.Frame(graphFrame)
+        controlFrame = tk.Frame(graphFrame, bg=BG_COLOR)
         controlFrame.grid(row=4, column=2)
         self.control_frame(controlFrame)
 
         # Initalize train frame
-        trainFrame = tk.Frame(graphFrame)
+        trainFrame = tk.Frame(graphFrame, bg=BG_COLOR)
         trainFrame.grid(row=4, column=3)
         self.train_frame(trainFrame)
 
     # Holds the training and testing button, along with epoch meter
     def train_frame(self, frame):
-        tk.Button(frame, text="Train Model", command=lambda: self.trainModel()).grid(row=1, column=1)
-        tk.Button(frame, text="Test Model", command=lambda: self.testModel()).grid(row=2, column=1)
-        tk.Button(frame, text="Clear Graphs", command=lambda: self.clearBoard()).grid(row=3, column=1)
-        self.epoch_meter = tk.Label(frame, text='.......')
-        tk.Label(frame, text='\t').grid(row=4, column=1)
+        tk.Button(frame, text="Train Model", command=lambda: self.trainModel(), bg=BG_COLOR, fg=FG_COLOR).grid(row=1, column=1)
+        tk.Button(frame, text="Test Model", command=lambda: self.testModel(), bg=BG_COLOR, fg=FG_COLOR).grid(row=2, column=1)
+        tk.Button(frame, text="Clear Graphs", command=lambda: self.clearBoard(), bg=BG_COLOR, fg=FG_COLOR).grid(row=3, column=1)
+        self.epoch_meter = tk.Label(frame, text='.......', bg=BG_COLOR, fg=FG_COLOR)
+        tk.Label(frame, text='\t', bg=BG_COLOR, fg=FG_COLOR).grid(row=4, column=1)
         self.epoch_meter.grid(row=5, column=1)
 
     # Holds the control panel frame which contains inputs for training and testing ratio, dataset size, and min/max values of inputs
     def control_frame(self, gframe):
-        frame = tk.Frame(gframe)
-        dual = tk.Frame(gframe)
+        frame = tk.Frame(gframe, bg=BG_COLOR)
+        dual = tk.Frame(gframe, bg=BG_COLOR)
 
-        tk.Label(frame, text="Train/Test Ratio: ").grid(row=1, column=1)
+        tk.Label(frame, text="Train/Test Ratio: ", bg=BG_COLOR, fg=FG_COLOR).grid(row=1, column=1)
         self.ttr_input = ttk.Entry(frame, width=5, justify="center")
         self.ttr_input.grid(row=1, column=2)
-        tk.Label(frame, text="%").grid(row=1, column=3)
-        tk.Label(frame, text="  Rows: ").grid(row=1, column=4)
+        tk.Label(frame, text=" %", bg=BG_COLOR, fg=FG_COLOR).grid(row=1, column=3)
+        tk.Label(frame, text="  Rows: ", bg=BG_COLOR, fg=FG_COLOR).grid(row=1, column=4)
         self.rows = ttk.Entry(frame, width=7, justify="center")
         self.rows.grid(row=1, column=5)
-        tk.Label(frame, text="  ").grid(row=1, column=6)
-        tk.Button(frame, text="Update DataSet", command=lambda: self.update_dataset()).grid(row=1, column=7)
-        tk.Label(frame, text="Epoch Rate: ").grid(row=2, column=1)
-        tk.Label(frame, text="Dollar Error: ").grid(row=3, column=1)
+        tk.Label(frame, text="  ", bg=BG_COLOR, fg=FG_COLOR).grid(row=1, column=6)
+        tk.Button(frame, text="Update DataSet", command=lambda: self.update_dataset(), bg=BG_COLOR, fg=FG_COLOR).grid(row=1, column=7)
+        tk.Label(frame, text="Epoch Rate: ", bg=BG_COLOR, fg=FG_COLOR).grid(row=2, column=1)
+        tk.Label(frame, text="Dollar Error: ", bg=BG_COLOR, fg=FG_COLOR).grid(row=3, column=1)
         self.epr = ttk.Entry(frame, width=5, justify="center")
         self.dlr = ttk.Entry(frame, width=5, justify="center")
         self.epr.grid(row=2, column=2)
         self.dlr.grid(row=3, column=2)
-        tk.Label(frame, text="%").grid(row=2, column=3)
-        tk.Label(frame, text=" Error: ").grid(row=2, column=4)
+        tk.Label(frame, text=" %", bg=BG_COLOR, fg=FG_COLOR).grid(row=2, column=3)
+        tk.Label(frame, text=" Error: ", bg=BG_COLOR, fg=FG_COLOR).grid(row=2, column=4)
         self.err_lvl = ttk.Entry(frame, width=7, justify="center")
         self.err_lvl.grid(row=2, column=5)
-        tk.Button(frame, text="Default DataSet", command=lambda: self.update_dataset(test=True)).grid(row=2, column=7)
+        tk.Button(frame, text="Default DataSet", command=lambda: self.update_dataset(test=True), bg=BG_COLOR, fg=FG_COLOR).grid(row=2, column=7)
         frame.pack(side=tk.BOTTOM)
 
-        tk.Label(dual, text=" ").grid(row=1, column=1)
-        tk.Label(dual, text="Min").grid(row=2, column=1)
-        tk.Label(dual, text="Max").grid(row=3, column=1)
+        tk.Label(dual, text=" ", bg=BG_COLOR, fg=FG_COLOR).grid(row=1, column=1)
+        tk.Label(dual, text="Min", bg=BG_COLOR, fg=FG_COLOR).grid(row=2, column=1)
+        tk.Label(dual, text="Max", bg=BG_COLOR, fg=FG_COLOR).grid(row=3, column=1)
         self.IP = {}
         for ii, vv in enumerate(self.variables):
             if vv != "Type":
-                tk.Label(dual, text=vv).grid(row=1, column=2 + ii)
+                tk.Label(dual, text=vv, bg=BG_COLOR, fg=FG_COLOR).grid(row=1, column=2 + ii)
 
                 dn_inp = ttk.Entry(dual, width=6, justify="center")
                 up_inp = ttk.Entry(dual, width=6, justify="center")
@@ -459,7 +494,7 @@ class gridboard(tk.Tk,
                 up_inp.grid(row=3, column=2 + ii)
 
                 self.IP[vv] = {"up": up_inp, "down": dn_inp}
-        tk.Label(dual, text=" ").grid(row=4, column=1)
+        tk.Label(dual, text=" ", bg=BG_COLOR, fg=FG_COLOR).grid(row=4, column=1)
         dual.pack(side=tk.TOP)
 
 
